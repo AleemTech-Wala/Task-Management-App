@@ -10,6 +10,7 @@ let taskToDelete = null;
 // DOM ELEMENTS
 const taskForm = document.getElementById('taskForm');
 const taskTitle = document.getElementById('taskTitle');
+const titleError = document.getElementById('titleError');
 const taskDescription = document.getElementById('taskDescription');
 const taskPriority = document.getElementById('taskPriority');
 const taskDueDate = document.getElementById('taskDueDate');
@@ -21,7 +22,7 @@ const filterButtons = document.querySelectorAll('.filter-btn');
 const sortSelect = document.getElementById('sortSelect');
 const clearCompletedBtn = document.getElementById('clearCompletedBtn');
 
-const tasksList = document.getElementById('tasksList');
+const taskList = document.getElementById('tasksList');
 const emptyState = document.getElementById('emptyState');
 
 const totalCount = document.getElementById('totalCount');
@@ -33,7 +34,6 @@ const confirmDelete = document.getElementById('confirmDelete');
 const cancelDelete = document.getElementById('cancelDelete');
 
 const descCharCount = document.getElementById('descCharCount');
-const titleError = document.getElementById('titleError');
 
 // ===============================
 // INITIALIZATION
@@ -107,3 +107,113 @@ clearCompletedBtn.addEventListener('click', () => {
         updateStats();
     }
 });
+
+// Modal events
+cancelDelete.addEventListener('click', () => {
+    deleteModal.classList.remove('show');
+    taskToDelete = null;
+});
+
+confirmDelete.addEventListener('click', () => {
+    if (taskToDelete){
+        deleteTask(taskToDelete);
+        deleteModal.classList.remove('show');
+        taskToDelete = null;
+    }
+});
+
+// Close modal on outside click
+deleteModal.addEventListener('click', (e) => {
+    if (e.target === deleteModal) {
+        deleteModal.classList.remove('show');
+        taskToDelete = null;
+    }
+});
+
+// Event delegation for task actions
+taskList.addEventListener('click', (e) => {
+    const taskCard = e.target.closest('.task-card');
+    if (!taskCard) return;
+
+    const taskId = taskCard.dataset.taskId;
+
+    // Toggle completion
+    if (e.target.classList.contains('task-checkbox')) {
+        toggleTaskCompletion(taskId);
+    }
+
+    // Edit task
+    if (e.target.classList.contains('edit-btn')) {
+        startEditingTask(taskId);
+    }
+
+    // Delete task
+    if (e.target.classList.contains('delete-btn')) {
+        taskToDelete = taskId;
+        deleteModal.classList.add('show');
+    }
+
+    // save edit
+    if (e.target.classList.contains('save-btn')) {
+        saveEditedTask(taskId);
+    }
+
+    // cancel edit
+    if (e.target.classList.contains('cancel-btn')) {
+        cancelEditingTask();
+    }
+});
+
+// Keyboard shortcuts
+document.addEventListener('keydown', (e) => {
+    // Escape key - cancel edit or close modal
+    if (e.key === 'Escape') {
+        if (editingTaskId) {
+            cancelEditTask();
+        }
+        if (deleteModal.classList.contains('show')) {
+            deleteModal.classList.remove('show');
+            taskToDelete = null;
+        }
+    }
+    
+    // Ctrl/Cmd + Enter - submit form
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        if (document.activeElement === taskTitle || 
+            document.activeElement === taskDescription) {
+            taskForm.dispatchEvent(new Event('submit'));
+        }
+    }
+});
+
+// ===============================
+// FORM VALIDATION
+// ===============================
+
+function validateForm() {
+    let isValid = true;
+
+    // Validate title
+    if (taskTitle.value.trim() === '') {
+        titleError.textContent = 'Title is required.';
+        taskTitle.classList.add('error');
+        isValid = false;
+    }else if(taskTitle.value.trim().length < 3) {
+        titleError.textContent = 'Title must be at least 3 characters long.';
+        taskTitle.classList.add('error');
+        isValid = false;
+    } else {
+        titleError.textContent = '';
+        taskTitle.classList.remove('error');
+    }
+        return isValid;
+}
+
+// Clear form errors on input
+taskTitle.addEventListener('input', () => {
+    if (taskTitle.value.trim().length >= 3) {
+        titleError.textContent = '';
+        taskTitle.classList.remove('error');
+    }
+});
+
