@@ -443,6 +443,7 @@ function renderTasks() {
     
     // Render tasks
     tasksList.innerHTML = filteredTasks.map(task => createTaskHTML(task)).join('');
+    initDragAndDrop();
 }
 
 // Create HTML for single task
@@ -452,7 +453,8 @@ function createTaskHTML(task) {
     
     return `
         <li class="task-card priority-${task.priority} ${task.completed ? 'completed' : ''} ${isEditing ? 'editing' : ''}" 
-            data-task-id="${task.id}">
+            data-task-id="${task.id}" draggable="true">
+            <div class="drag-handle">⠿</div>
             <div class="task-header">
                 <input 
                     type="checkbox" 
@@ -600,6 +602,73 @@ window.taskManager = {
         }
     }
 };
+
+// ===============================
+// DRAG & DROP
+// ===============================
+
+let draggedTaskId = null;  // konsa task drag ho raha hai
+
+function initDragAndDrop() {
+    const cards = tasksList.querySelectorAll('.task-card');
+
+    cards.forEach(card => {
+
+        // Drag shuru hua
+        card.addEventListener('dragstart', (e) => {
+            draggedTaskId = card.dataset.taskId;
+            card.classList.add('dragging');
+
+            // Firefox ke liye zaruri
+            e.dataTransfer.effectAllowed = 'move';
+        });
+
+        // Drag khatam hua
+        card.addEventListener('dragend', () => {
+            card.classList.remove('dragging');
+            // Saare drag-over classes hatao
+            tasksList.querySelectorAll('.drag-over')
+                .forEach(c => c.classList.remove('drag-over'));
+        });
+
+        // Doosre card ke upar aaya
+        card.addEventListener('dragover', (e) => {
+            e.preventDefault(); // Drop allow karo
+            card.classList.add('drag-over');
+        });
+
+        // Card ke bahar gaya
+        card.addEventListener('dragleave', () => {
+            card.classList.remove('drag-over');
+        });
+
+        // Drop hua
+        card.addEventListener('drop', (e) => {
+            e.preventDefault();
+            card.classList.remove('drag-over');
+
+            const droppedOnId = card.dataset.taskId;
+
+            // Same card pe drop? Kuch mat karo
+            if (draggedTaskId === droppedOnId) return;
+
+            // Tasks array mein order badlo
+            const draggedIndex = tasks.findIndex(t => t.id === draggedTaskId);
+            const droppedIndex = tasks.findIndex(t => t.id === droppedOnId);
+
+            // Dragged task nikalo
+            const [draggedTask] = tasks.splice(draggedIndex, 1);
+
+            // Nai jagah daalo
+            tasks.splice(droppedIndex, 0, draggedTask);
+
+            // Save aur render
+            saveTasksToStorage();
+            tasksList.innerHTML = tasks.map(task => createTaskHTML(task)).join('');
+            initDragAndDrop();
+        });
+    });
+}
 
 console.log('✅ Task Manager initialized!');
 console.log('💡 Tip: Use window.taskManager for debugging');

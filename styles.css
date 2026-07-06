@@ -645,6 +645,31 @@ body {
 }
 
 /* ===============================
+   DRAG & DROP
+   =============================== */
+    .drag-handle {
+    cursor: grab;
+    color: #aaa;
+    font-size: 20px;
+    padding: 0 8px;
+    user-select: none;
+}
+
+.drag-handle:active {
+    cursor: grabbing;
+}
+
+.task-card.dragging {
+    opacity: 0.4;
+    border: 2px dashed #667eea;
+    background: #f0f0f0;
+}
+
+.task-card.drag-over {
+    border-top: 3px solid #667eea;
+}
+
+/* ===============================
    ANIMATIONS
    =============================== */
 @keyframes slideIn {
