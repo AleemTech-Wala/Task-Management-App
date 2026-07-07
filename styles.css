@@ -669,6 +669,37 @@ body {
     border-top: 3px solid #667eea;
 }
 
+/* Category Badge */
+.badge-category {
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* Category Colors */
+.category-general   { background: #e2e8f0; color: #475569; }
+.category-work      { background: #dbeafe; color: #1d4ed8; }
+.category-personal  { background: #fce7f3; color: #be185d; }
+.category-shopping  { background: #dcfce7; color: #15803d; }
+.category-health    { background: #fed7aa; color: #c2410c; }
+.category-education { background: #ede9fe; color: #7c3aed; }
+
+/* Category Filter Dropdown */
+.category-filter select {
+    padding: 12px 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+    background: white;
+}
+
+.category-filter select:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
 /* ===============================
    ANIMATIONS
    =============================== */

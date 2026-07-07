@@ -6,6 +6,7 @@ let currentFilter = 'all';
 let currentSort = 'date-desc';
 let editingTaskId = null;
 let taskToDelete = null;
+let currentCategory = 'all';
 
 // DOM Elements
 const taskForm = document.getElementById('taskForm');
@@ -34,6 +35,9 @@ const cancelDelete = document.getElementById('cancelDelete');
 
 const descCharCount = document.getElementById('descCharCount');
 const titleError = document.getElementById('titleError');
+
+const taskCategory = document.getElementById('taskCategory');
+const categoryFilter = document.getElementById('categoryFilter');
 
 // ===============================
 // INITIALIZATION
@@ -186,6 +190,13 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
+
+categoryFilter.addEventListener('change', (e) => {
+    currentCategory = e.target.value;
+    renderTasks();
+});
+
+
 // ===============================
 // FORM VALIDATION
 // ===============================
@@ -228,6 +239,7 @@ function addTask() {
         title: taskTitle.value.trim(),
         description: taskDescription.value.trim(),
         priority: taskPriority.value,
+        category: taskCategory.value,
         dueDate: taskDueDate.value,
         completed: false,
         createdAt: new Date().toISOString()
@@ -390,6 +402,11 @@ function getFilteredTasks() {
             break;
         // 'all' - no filtering needed
     }
+
+    // Apply category filter
+    if (currentCategory !== 'all') {
+        filtered = filtered.filter(task => task.category === currentCategory);
+    }
     
     // Apply search
     const searchTerm = searchInput.value.trim().toLowerCase();
@@ -468,6 +485,9 @@ function createTaskHTML(task) {
                     <div class="task-meta">
                         <span class="task-badge badge-priority ${task.priority}">
                             ${getPriorityIcon(task.priority)} ${task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
+                        </span>
+                        <span class="task-badge badge-category category-${task.category}">
+                            ${getCategoryIcon(task.category)} ${task.category.charAt(0).toUpperCase() + task.category.slice(1)}
                         </span>
                         ${task.dueDate ? `
                             <span class="task-badge badge-date ${isOverdue ? 'overdue' : ''}">
@@ -583,6 +603,17 @@ function formatDate(dateString) {
     // Format as MMM DD, YYYY
     const options = { month: 'short', day: 'numeric', year: 'numeric' };
     return date.toLocaleDateString('en-US', options);
+}
+
+function getCategoryIcon(category) {
+    switch(category) {
+        case 'work':       return '💼';
+        case 'personal':   return '👤';
+        case 'shopping':   return '🛒';
+        case 'health':     return '💪';
+        case 'education':  return '📚';
+        default:           return '📌';
+    }
 }
 
 // ===============================
