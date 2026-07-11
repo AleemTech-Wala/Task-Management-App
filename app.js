@@ -39,6 +39,8 @@ const titleError = document.getElementById('titleError');
 const taskCategory = document.getElementById('taskCategory');
 const categoryFilter = document.getElementById('categoryFilter');
 
+const darkModeBtn = document.getElementById('darkModeBtn');
+
 // ===============================
 // INITIALIZATION
 // ===============================
@@ -46,6 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadTasksFromStorage();
     renderTasks();
     updateStats();
+    initDarkMode();
     
     // Set minimum date to today
     const today = new Date().toISOString().split('T')[0];
@@ -700,6 +703,34 @@ function initDragAndDrop() {
         });
     });
 }
+
+// ===============================
+// DARK MODE
+// ===============================
+
+function initDarkMode() {
+    // localStorage se preference load karo
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+        document.body.classList.add('dark');
+        darkModeBtn.textContent = '☀️ Light Mode';
+    }
+}
+
+function toggleDarkMode() {
+    document.body.classList.toggle('dark');
+
+    if (document.body.classList.contains('dark')) {
+        darkModeBtn.textContent = '☀️ Light Mode';
+        localStorage.setItem('theme', 'dark');
+    } else {
+        darkModeBtn.textContent = '🌙 Dark Mode';
+        localStorage.setItem('theme', 'light');
+    }
+}
+
+// Event listener
+darkModeBtn.addEventListener('click', toggleDarkMode);
 
 console.log('✅ Task Manager initialized!');
 console.log('💡 Tip: Use window.taskManager for debugging');

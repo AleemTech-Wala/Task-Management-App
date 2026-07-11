@@ -701,6 +701,245 @@ body {
 }
 
 /* ===============================
+   DARK MODE
+   =============================== */
+
+/* Dark Mode Button */
+.dark-mode-btn {
+    padding: 8px 20px;
+    border: 2px solid var(--primary-color);
+    border-radius: 20px;
+    background: transparent;
+    color: var(--primary-color);
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all var(--transition-base);
+    letter-spacing: 0.02em;
+}
+
+.dark-mode-btn:hover {
+    background: var(--primary-color);
+    color: white;
+    box-shadow: var(--shadow-md);
+}
+
+/* Dark Mode Variables Override */
+body.dark {
+    --bg-color: #0f0f1a;
+    --card-bg: #1a1a2e;
+    --text-primary: #e2e8f0;
+    --text-secondary: #94a3b8;
+    --border-color: #2d2d44;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+    --shadow-md: 0 4px 6px rgba(0,0,0,0.4);
+    --shadow-lg: 0 10px 15px rgba(0,0,0,0.4);
+    background: linear-gradient(135deg, #0f0f1a 0%, #1a0a2e 100%);
+}
+
+/* Header */
+body.dark .header {
+    background: #13132a;
+    border-bottom: 1px solid var(--border-color);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.4);
+}
+
+body.dark .logo {
+    color: var(--primary-color);
+}
+
+body.dark .stat-label {
+    color: var(--text-secondary);
+}
+
+/* Form Section */
+body.dark .task-form-section {
+    background: var(--card-bg);
+    box-shadow: var(--shadow-lg);
+}
+
+body.dark .form-group label {
+    color: var(--text-primary);
+}
+
+body.dark .form-group input,
+body.dark .form-group textarea,
+body.dark .form-group select {
+    background: #0f0f1a;
+    color: var(--text-primary);
+    border-color: var(--border-color);
+}
+
+body.dark .form-group input:focus,
+body.dark .form-group textarea:focus,
+body.dark .form-group select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+}
+
+body.dark .form-group input::placeholder,
+body.dark .form-group textarea::placeholder {
+    color: var(--text-secondary);
+}
+
+body.dark .char-count {
+    color: var(--text-secondary);
+}
+
+/* Buttons */
+body.dark .btn-secondary {
+    background: #2d2d44;
+    color: var(--text-primary);
+}
+
+body.dark .btn-secondary:hover {
+    background: #3d3d5c;
+}
+
+/* Controls */
+body.dark .controls {
+    background: var(--card-bg);
+}
+
+body.dark .search-box input {
+    background: #0f0f1a;
+    color: var(--text-primary);
+    border-color: var(--border-color);
+}
+
+body.dark .search-box input::placeholder {
+    color: var(--text-secondary);
+}
+
+body.dark .search-box input:focus {
+    border-color: var(--primary-color);
+}
+
+body.dark .filter-buttons {
+    background: #0f0f1a;
+}
+
+body.dark .filter-btn {
+    color: var(--text-secondary);
+}
+
+body.dark .filter-btn:hover {
+    background: var(--border-color);
+    color: var(--text-primary);
+}
+
+body.dark .filter-btn.active {
+    background: var(--primary-color);
+    color: white;
+}
+
+body.dark .sort-box select,
+body.dark .category-filter select {
+    background: #0f0f1a;
+    color: var(--text-primary);
+    border-color: var(--border-color);
+}
+
+/* Tasks Section */
+body.dark .tasks-section {
+    background: var(--card-bg);
+}
+
+body.dark .tasks-header {
+    border-bottom-color: var(--border-color);
+}
+
+body.dark .tasks-header h2 {
+    color: var(--text-primary);
+}
+
+/* Task Cards */
+body.dark .task-card {
+    background: #13132a;
+    border-color: var(--border-color);
+    color: var(--text-primary);
+}
+
+body.dark .task-card:hover {
+    background: #1e1e3a;
+    border-color: #3d3d5c;
+    box-shadow: var(--shadow-md);
+}
+
+body.dark .task-title {
+    color: var(--text-primary);
+}
+
+body.dark .task-description {
+    color: var(--text-secondary);
+}
+
+body.dark .task-meta {
+    color: var(--text-secondary);
+}
+
+/* Task Buttons */
+body.dark .task-btn {
+    background: #2d2d44;
+    color: var(--text-primary);
+}
+
+body.dark .task-btn:hover {
+    background: #3d3d5c;
+}
+
+body.dark .task-btn.edit-btn:hover {
+    background: rgba(102, 126, 234, 0.2);
+    color: var(--primary-color);
+}
+
+body.dark .task-btn.delete-btn:hover {
+    background: rgba(239, 68, 68, 0.2);
+    color: var(--danger-color);
+}
+
+/* Drag Handle */
+body.dark .drag-handle {
+    color: var(--text-secondary);
+}
+
+/* Empty State */
+body.dark .empty-state h3 {
+    color: var(--text-primary);
+}
+
+body.dark .empty-state p {
+    color: var(--text-secondary);
+}
+
+/* Modal */
+body.dark .modal {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+}
+
+body.dark .modal h3 {
+    color: var(--text-primary);
+}
+
+body.dark .modal p {
+    color: var(--text-secondary);
+}
+
+/* Scrollbar */
+body.dark ::-webkit-scrollbar-track {
+    background: #0f0f1a;
+}
+
+body.dark ::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+}
+
+body.dark ::-webkit-scrollbar-thumb:hover {
+    background: #3d3d5c;
+}
+
+/* ===============================
    ANIMATIONS
    =============================== */
 @keyframes slideIn {
