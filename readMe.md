@@ -26,6 +26,16 @@ A modern, fully-featured task management app built with **pure Vanilla JavaScrip
 - localStorage persistence — data survives page refresh
 - Clear all completed tasks at once
 
+### Subtasks
+- Add checklist items within any task
+- Inline editing — edit subtask text directly in the task card
+- Delete individual subtasks
+- Progress bar with "X/Y completed" text
+- Auto-complete task when all subtasks are checked
+- Auto-uncomplete task when a subtask is unchecked
+- Warning confirmation when manually completing task with incomplete subtasks
+- Keyboard support — Enter to save, Escape to cancel editing
+
 ### UI / UX
 - Modern gradient design
 - Fully responsive — mobile, tablet, desktop
