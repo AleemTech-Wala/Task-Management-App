@@ -169,6 +169,54 @@ tasksList.addEventListener('click', (e) => {
     if (e.target.classList.contains('cancel-btn')) {
         cancelEditTask();
     }
+    
+    // Add subtask
+    if (e.target.classList.contains('add-subtask-btn')) {
+        const input = taskCard.querySelector('.subtask-input');
+        if (input && input.value.trim()) {
+            addSubtask(taskId, input.value.trim());
+            input.value = '';
+        }
+    }
+    
+    // Toggle subtask
+    if (e.target.classList.contains('subtask-checkbox')) {
+        const subtaskItem = e.target.closest('.subtask-item');
+        if (subtaskItem) {
+            const subtaskId = subtaskItem.dataset.subtaskId;
+            toggleSubtask(taskId, subtaskId);
+        }
+    }
+    
+    // Delete subtask
+    if (e.target.classList.contains('subtask-delete-btn')) {
+        const subtaskItem = e.target.closest('.subtask-item');
+        if (subtaskItem) {
+            const subtaskId = subtaskItem.dataset.subtaskId;
+            deleteSubtask(taskId, subtaskId);
+        }
+    }
+    
+    // Edit subtask
+    if (e.target.classList.contains('subtask-edit-btn')) {
+        const subtaskItem = e.target.closest('.subtask-item');
+        if (subtaskItem) {
+            const subtaskId = subtaskItem.dataset.subtaskId;
+            editSubtask(taskId, subtaskId);
+        }
+    }
+});
+
+// Handle Enter key for subtask input
+tasksList.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && e.target.classList.contains('subtask-input')) {
+        const taskCard = e.target.closest('.task-card');
+        if (taskCard && e.target.value.trim()) {
+            const taskId = taskCard.dataset.taskId;
+            addSubtask(taskId, e.target.value.trim());
+            e.target.value = '';
+        }
+    }
 });
 
 // Keyboard shortcuts
@@ -245,6 +293,7 @@ function addTask() {
         category: taskCategory.value,
         dueDate: taskDueDate.value,
         completed: false,
+        subtasks: [],
         createdAt: new Date().toISOString()
     };
     
@@ -269,6 +318,16 @@ function addTask() {
 function toggleTaskCompletion(taskId) {
     const task = tasks.find(t => t.id === taskId);
     if (task) {
+        // Warning when completing a task with incomplete subtasks
+        if (!task.completed && task.subtasks && task.subtasks.length > 0) {
+            const incompleteSubtasks = task.subtasks.filter(s => !s.completed).length;
+            if (incompleteSubtasks > 0) {
+                if (!confirm(`This task has ${incompleteSubtasks} incomplete subtask(s). Are you sure you want to mark it as completed?`)) {
+                    return;
+                }
+            }
+        }
+        
         task.completed = !task.completed;
         saveTasksToStorage();
         renderTasks();
@@ -388,6 +447,210 @@ function deleteTask(taskId) {
 }
 
 // ===============================
+// SUBTASK OPERATIONS
+// ===============================
+
+// Add subtask to a task
+function addSubtask(taskId, text) {
+    if (!text || text.trim().length === 0) return;
+    
+    const task = tasks.find(t => t.id === taskId);
+    if (!task) return;
+    
+    if (!task.subtasks) task.subtasks = [];
+    
+    task.subtasks.push({
+        id: Date.now().toString(),
+        text: text.trim(),
+        completed: false
+    });
+    
+    saveTasksToStorage();
+    renderTasks();
+}
+
+// Toggle subtask completion
+function toggleSubtask(taskId, subtaskId) {
+    const task = tasks.find(t => t.id === taskId);
+    if (!task || !task.subtasks) return;
+    
+    const subtask = task.subtasks.find(s => s.id === subtaskId);
+    if (!subtask) return;
+    
+    subtask.completed = !subtask.completed;
+    
+    // Auto-complete task when all subtasks are done
+    const allCompleted = task.subtasks.length > 0 && task.subtasks.every(s => s.completed);
+    if (allCompleted && !task.completed) {
+        task.completed = true;
+    }
+    
+    // Auto-uncomplete task when a subtask is unchecked
+    if (!subtask.completed && task.completed) {
+        task.completed = false;
+    }
+    
+    saveTasksToStorage();
+    renderTasks();
+    updateStats();
+}
+
+// Delete subtask
+function deleteSubtask(taskId, subtaskId) {
+    const task = tasks.find(t => t.id === taskId);
+    if (!task || !task.subtasks) return;
+    
+    task.subtasks = task.subtasks.filter(s => s.id !== subtaskId);
+    
+    saveTasksToStorage();
+    renderTasks();
+}
+
+// Edit subtask - switch to inline edit mode
+function editSubtask(taskId, subtaskId) {
+    const taskCard = document.querySelector(`[data-task-id="${taskId}"]`);
+    if (!taskCard) return;
+    
+    const subtaskItem = taskCard.querySelector(`[data-subtask-id="${subtaskId}"]`);
+    if (!subtaskItem) return;
+    
+    const textSpan = subtaskItem.querySelector('.subtask-text');
+    const currentText = textSpan.textContent;
+    
+    // Replace span with input
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'subtask-edit-input';
+    input.value = currentText;
+    input.maxLength = 100;
+    textSpan.replaceWith(input);
+    
+    // Replace edit button with save/cancel buttons
+    const editBtn = subtaskItem.querySelector('.subtask-edit-btn');
+    const deleteBtn = subtaskItem.querySelector('.subtask-delete-btn');
+    
+    const saveBtn = document.createElement('button');
+    saveBtn.className = 'task-btn subtask-save-btn';
+    saveBtn.textContent = '💾';
+    
+    const cancelBtn = document.createElement('button');
+    cancelBtn.className = 'task-btn subtask-cancel-edit-btn';
+    cancelBtn.textContent = '❌';
+    
+    editBtn.style.display = 'none';
+    deleteBtn.style.display = 'none';
+    subtaskItem.appendChild(saveBtn);
+    subtaskItem.appendChild(cancelBtn);
+    
+    input.focus();
+    input.select();
+    
+    // Save on Enter
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            saveEditSubtask(taskId, subtaskId, input.value);
+        }
+        if (e.key === 'Escape') {
+            cancelEditSubtask(taskId, subtaskId);
+        }
+    });
+    
+    // Save button click
+    saveBtn.addEventListener('click', () => {
+        saveEditSubtask(taskId, subtaskId, input.value);
+    });
+    
+    // Cancel button click
+    cancelBtn.addEventListener('click', () => {
+        cancelEditSubtask(taskId, subtaskId);
+    });
+}
+
+// Save edited subtask
+function saveEditSubtask(taskId, subtaskId, newText) {
+    if (!newText || newText.trim().length === 0) {
+        cancelEditSubtask(taskId, subtaskId);
+        return;
+    }
+    
+    const task = tasks.find(t => t.id === taskId);
+    if (!task || !task.subtasks) return;
+    
+    const subtask = task.subtasks.find(s => s.id === subtaskId);
+    if (!subtask) return;
+    
+    subtask.text = newText.trim();
+    
+    saveTasksToStorage();
+    renderTasks();
+}
+
+// Cancel subtask edit
+function cancelEditSubtask(taskId, subtaskId) {
+    renderTasks();
+}
+
+// Get subtask progress
+function getSubtaskProgress(task) {
+    if (!task.subtasks || task.subtasks.length === 0) {
+        return { completed: 0, total: 0, percentage: 0 };
+    }
+    
+    const completed = task.subtasks.filter(s => s.completed).length;
+    const total = task.subtasks.length;
+    const percentage = Math.round((completed / total) * 100);
+    
+    return { completed, total, percentage };
+}
+
+// Render subtasks HTML
+function renderSubtasks(task) {
+    if (!task.subtasks || task.subtasks.length === 0) {
+        return `
+            <div class="subtask-section">
+                <div class="subtask-input-row">
+                    <input type="text" class="subtask-input" placeholder="Add a subtask..." maxlength="100">
+                    <button class="task-btn add-subtask-btn">➕</button>
+                </div>
+            </div>
+        `;
+    }
+    
+    const progress = getSubtaskProgress(task);
+    
+    const subtaskItems = task.subtasks.map(subtask => `
+        <div class="subtask-item" data-subtask-id="${subtask.id}">
+            <input 
+                type="checkbox" 
+                class="subtask-checkbox"
+                ${subtask.completed ? 'checked' : ''}
+            >
+            <span class="subtask-text ${subtask.completed ? 'completed' : ''}">${escapeHTML(subtask.text)}</span>
+            <button class="task-btn subtask-edit-btn">✏️</button>
+            <button class="task-btn subtask-delete-btn">🗑️</button>
+        </div>
+    `).join('');
+    
+    return `
+        <div class="subtask-section">
+            <div class="subtask-progress">
+                <div class="subtask-progress-bar">
+                    <div class="subtask-progress-fill" style="width: ${progress.percentage}%"></div>
+                </div>
+                <span class="subtask-progress-text">${progress.completed}/${progress.total} completed</span>
+            </div>
+            <div class="subtask-list">
+                ${subtaskItems}
+            </div>
+            <div class="subtask-input-row">
+                <input type="text" class="subtask-input" placeholder="Add a subtask..." maxlength="100">
+                <button class="task-btn add-subtask-btn">➕</button>
+            </div>
+        </div>
+    `;
+}
+
+// ===============================
 // FILTERING & SORTING
 // ===============================
 
@@ -498,6 +761,8 @@ function createTaskHTML(task) {
                             </span>
                         ` : ''}
                     </div>
+                    
+                    ${renderSubtasks(task)}
                 </div>
             </div>
             
@@ -627,6 +892,10 @@ window.taskManager = {
     addTask,
     deleteTask,
     toggleTaskCompletion,
+    addSubtask,
+    toggleSubtask,
+    deleteSubtask,
+    editSubtask,
     clearAll: () => {
         if (confirm('Are you sure you want to delete ALL tasks?')) {
             tasks = [];
